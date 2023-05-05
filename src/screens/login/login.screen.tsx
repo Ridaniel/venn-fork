@@ -39,11 +39,7 @@ const LoginScreen = ({navigation, route}: any) => {
       <View style={styles.buttonsContainer}>
         <TouchableOpacity
           onPress={() => {
-            Auth.federatedSignIn({
-              provider: CognitoHostedUIIdentityProvider.Google,
-            });
-
-            dispatch(setApp({isLoading: true}));
+            navigation.navigate('Avatar', {isUpdateFlow: true})
           }}>
           <Image source={google} style={styles.googleButton} />
         </TouchableOpacity>

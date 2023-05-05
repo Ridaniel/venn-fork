@@ -6,6 +6,7 @@ import {Provider} from 'react-redux';
 import amplifyConfiguration from '../amplify.config';
 import LoadingComponent from './components/loading.component';
 import HomeScreen from './screens/home/home.screen';
+import AvatarScreen from './screens/avatar/avatar.screen';
 import LoginScreen from './screens/login/login.screen';
 import MyDataScreen from './screens/my-data/my-data.screen';
 import NicknameScreen from './screens/nickname/nickname.screen';
@@ -37,6 +38,7 @@ const App = () => {
         }}>
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Nickname" component={NicknameScreen} />
+        <Stack.Screen name="Avatar" component={AvatarScreen} />
         <Stack.Screen name="MyData" component={MyDataScreen} />
         <Stack.Screen name="TopicsToTalk" component={TopicsToTalkScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
