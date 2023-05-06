@@ -14,6 +14,20 @@ class FacadeWebRTC {
     return peerConnection;
   }
 
+  monitorRemoteAudioLevels(peerConnection: RTCPeerConnection, onAudioLevelChange: (level: number) => void) {
+    setInterval(async () => {
+    console.log(peerConnection)
+      const stats = await peerConnection.getStats();
+      const audioReceivers = Array.from(stats.values()).filter(stat => stat.type === 'inbound-rtp' && stat.mediaType === 'audio');
+
+      if (audioReceivers.length > 0) {
+        const audioReceiver = audioReceivers[0];
+        const audioLevel = audioReceiver.audioLevel || 0;
+        onAudioLevelChange(audioLevel);
+      }
+    }, 1000); // Check every 1 second (1000 milliseconds)
+  }
+
   async createLocalMediaStream(): Promise<MediaStream> {
     console.info('Create Local MediaStream');
     let isVoiceOnly = true;

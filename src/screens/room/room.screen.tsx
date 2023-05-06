@@ -12,7 +12,7 @@ import FloatButtonComponent from '../../components/float-button.component';
 import {setApp} from '../../store/slices/app.slice';
 import {cleanRoom} from '../../store/slices/room.slice';
 import {RootState} from '../../store/store';
-import {URL_AVATAR_GIF} from '../../utils/constants.util';
+import {URL_AVATAR_GIF, URL_AVATAR_IMAGE} from '../../utils/constants.util';
 import facadeWebRtc from '../../web-rtc/facade.web-rtc';
 import DetailRoomComponent from './components/detail.room.component';
 import SummaryRoomComponent from './components/summary.room.component';
@@ -20,10 +20,14 @@ import SummaryRoomComponent from './components/summary.room.component';
 const RoomScreen = ({navigation}: any) => {
   const room = useSelector((state: RootState) => state.room.value);
   const dispatch = useDispatch();
+  const [isTalking, setIsTalking] = React.useState(false);
   const [isShowDetail, setIsShowDetail] = React.useState(false);
   const [isEnabledSpeaker, setIsEnabledSpeaker] = React.useState(true);
   const [isEnabledMicrophone, setIsEnabledMicrophone] = React.useState(true);
+  const [gifAvatarURI, setGifAvatarURI] = React.useState<string>('');
   const [avatarURI, setAvatarURI] = React.useState<string>('');
+  const [remoteAudioLevel, setRemoteAudioLevel] = React.useState(0);
+
   const hideDetailInformation = () => {
     setIsShowDetail(false);
   };
@@ -37,10 +41,43 @@ const RoomScreen = ({navigation}: any) => {
     }, 0);
   };
 
+  const avatarSource = isTalking
+    ? {
+        uri: gifAvatarURI,
+        priority: FastImage.priority.normal,
+      }
+    : {
+        uri: avatarURI,
+        priority: FastImage.priority.normal,
+      };
+
+
+  // Update isTalking when remoteAudioLevel changes
+  React.useEffect(() => {
+    setIsTalking(remoteAudioLevel > 0.01);
+  }, [remoteAudioLevel]);
+
+  // Configure Avatar GIF
+  React.useEffect(() => {
+    setGifAvatarURI(`${URL_AVATAR_GIF}${room?.friend?.user}.gif`);
+  }, []);
   // Configure Avatar
   React.useEffect(() => {
-    setAvatarURI(`${URL_AVATAR_GIF}${room?.friend?.user}.gif`);
+      setAvatarURI(`${URL_AVATAR_IMAGE}${room?.friend?.user}.png`);
   }, []);
+
+  //Check when audio leve changes
+    React.useEffect(() => {
+    console.log(room)
+    console.log("Cambio el audio 1")
+
+      if (room.webRTC.rtcPeerConnection && room.webRTC.remoteMediaStream) {
+       console.log("Cambio el audio 2")
+        facadeWebRtc.monitorRemoteAudioLevels(room.webRTC.rtcPeerConnection , (level) => {
+          setRemoteAudioLevel(level);
+        });
+      }
+    }, [room.webRTC.peerConnection, room.webRTC.remoteMediaStream]);
 
   // Configure Controll for call
   React.useEffect(() => {
@@ -67,14 +104,12 @@ const RoomScreen = ({navigation}: any) => {
             zOrder={0}
           />
         )}
-        <FastImage
-          style={styles.avatar}
-          source={{
-            uri: avatarURI,
-            priority: FastImage.priority.normal,
-          }}
-          resizeMode={FastImage.resizeMode.contain}
-        />
+      <FastImage
+        key={isTalking ? 'gif' : 'png'}
+        style={styles.avatar}
+        source={avatarSource}
+        resizeMode={FastImage.resizeMode.contain}
+      />
         <FloatButtonComponent
           styles={
             isEnabledSpeaker ? styles.speakerEnabled : styles.speakerDisabled
@@ -120,9 +155,9 @@ const RoomScreen = ({navigation}: any) => {
 export default RoomScreen;
 
 const styles = StyleSheet.create({
-  roomContainer: {flex: 1, backgroundColor: 'white'},
+  roomContainer: {flex: 1, backgroundColor: 'grey'},
   summaryContainer: {flex: 1, backgroundColor: 'white', marginBottom: 27},
-  avatar: {flex: 1, maxHeight: '80%', marginBottom: 27},
+  avatar: {flex: 1, maxHeight: '80%', marginBottom: 27, backgroundColor: 'grey'},
   callEnd: {
     backgroundColor: '#FF0000',
     position: 'absolute',
