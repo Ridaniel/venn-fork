@@ -94,7 +94,12 @@ android {
     ndkVersion rootProject.ext.ndkVersion
 
     compileSdkVersion rootProject.ext.compileSdkVersion
-
+    flavorDimensions "react-native-camera"
+    productFlavors {
+        general {
+            dimension "react-native-camera"
+        }
+    }
     namespace "com.ven"
     defaultConfig {
         applicationId "com.ven"
